@@ -39,4 +39,18 @@ public class UserService implements IUserService
                 .filter(user -> password.equals(user.getPassword()))
                 .orElse(null);
     }
+
+    @Override
+    public UserDTO userInfo(Long id) throws Exception {
+        if (id < 1)
+            return null;
+
+        User user = userRepository.findById(id).orElseThrow();
+        UserDTO userDTO = new UserDTO();
+        userDTO.setEmail(user.getEmail());
+        userDTO.setPhone(user.getPhone());
+        userDTO.setFullName(user.getFullName());
+
+        return userDTO;
+    }
 }

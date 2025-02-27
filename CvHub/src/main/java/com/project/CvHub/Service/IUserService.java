@@ -7,4 +7,5 @@ public interface IUserService
 {
     User createUser(UserDTO userDTO) throws Exception;
     User login(String email, String password) throws Exception;
+    UserDTO userInfo(Long id)throws Exception;
 }

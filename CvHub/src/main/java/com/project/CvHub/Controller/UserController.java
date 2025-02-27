@@ -8,10 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -58,5 +55,15 @@ public class UserController
         if (token == null)
             return ResponseEntity.badRequest().body("user does not exist");
         return ResponseEntity.ok(token);
+    }
+
+    @PostMapping("/userInfo/{id}")
+    public ResponseEntity<?> userInfo(@PathVariable Long id) throws Exception
+    {
+        UserDTO user = userService.userInfo(id);
+        if (user == null)
+            return ResponseEntity.badRequest().body("user does not exist");
+
+        return ResponseEntity.ok(user);
     }
 }
