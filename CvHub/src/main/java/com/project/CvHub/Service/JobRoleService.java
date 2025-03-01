@@ -4,6 +4,6 @@ import com.project.CvHub.Repository.JobRoleRepository;
 import org.springframework.stereotype.Service;
 
 @Service
-public interface JobRoleService {
+public interface JobRoleService  {
 
 }

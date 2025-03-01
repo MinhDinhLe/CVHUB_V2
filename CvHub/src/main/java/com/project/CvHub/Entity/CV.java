@@ -24,7 +24,7 @@ public class CV {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Column(name = "fullName")
     private String fullName;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

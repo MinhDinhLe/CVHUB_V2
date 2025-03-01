@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 @Service
-public interface ParsingCVService {
+public interface ParsingCVService  {
 	String extractTextFromPdfOrWord(MultipartFile file) throws IOException;
 	 Map<String, String> parseContent(String content, User user);
 }

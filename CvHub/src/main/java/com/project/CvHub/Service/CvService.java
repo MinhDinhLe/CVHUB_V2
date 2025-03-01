@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
-public interface CvService{
+public interface CvService {
 	CV saveCV(String fullName, int locationCode, Long jobRoleId, String email, String phone, String education, String skills, String experience, String projects, String certifications, String activities, MultipartFile logoFile, User user);
 	long getSelectedCVCount(Long userId);
 	List<CV> findCVsByUserId(Long id);
