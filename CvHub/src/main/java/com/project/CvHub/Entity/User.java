@@ -1,49 +1,52 @@
-package com.project.CvHub.Model;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
-import org.hibernate.Internal;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+package com.project.CvHub.Entity;
 
 import java.util.Date;
+import java.util.List;
+import jakarta.persistence.*;
 
-@Entity
-@Table(name = "cvhub_user")
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Getter
 @Setter
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Table(name = "cvhub_user")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "full_name", nullable = false)
+    
+    @Column(nullable = false)
     private String fullName;
-
+    
     @Column(unique = true, nullable = false)
     private String email;
-
+    
     @Column(nullable = false)
     private String password;
-
+    
     private String phone;
 
-    @ManyToOne
-    @JoinColumn(name = "location_id")
-    private Location location;
-
     @Column(name = "role", nullable = false)
-    private String role = "ROLE_USER";
+    private String role = "ROLE_USER"; // Mặc định là ROLE_USER
+    
+    @OneToOne(mappedBy = "user")
+    private Organization organization;
 
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<CV> cvList;
+    
     @CreationTimestamp
     @Column(name = "created_date", updatable = false)
     private Date createdDate;
-
+    
     @UpdateTimestamp
     @Column(name = "modified_date")
     private Date modifiedDate;

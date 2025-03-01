@@ -1,6 +1,7 @@
-package com.project.CvHub.DTO;
+package com.project.CvHub.Controller.model;
 
 
+import org.springframework.web.multipart.MultipartFile;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
