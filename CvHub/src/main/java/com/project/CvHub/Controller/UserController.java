@@ -1,62 +1,137 @@
 package com.project.CvHub.Controller;
 
-import com.project.CvHub.DTO.UserDTO;
-import com.project.CvHub.Model.User;
-import com.project.CvHub.Service.IUserService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.List;
-import java.util.Objects;
+import com.project.CvHub.Repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import com.project.CvHub.Entity.User;
+import com.project.CvHub.Controller.model.UserDTO;
+import com.project.CvHub.Service.CvService;
+import com.project.CvHub.Service.UserService;
 
 @RestController
-@RequestMapping("api/v1/users")
-@RequiredArgsConstructor
-public class UserController
-{
-    private final IUserService userService;
+@RequestMapping("/api/user")
+public class UserController {
 
-    @PostMapping("/register")
-    public ResponseEntity<?> createUser (@Valid @RequestBody UserDTO userDTO, BindingResult result)
-    {
-        try
-        {
-            if (result.hasErrors())
-            {
-                List<String> errorsMessages = result.getFieldErrors()
-                        .stream()
-                        .map(FieldError::getDefaultMessage)
-                        .toList();
-                return ResponseEntity.badRequest().body(errorsMessages);
-            }
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
 
-            if (!Objects.equals(userDTO.getPassword(), userDTO.getRetypePassword()))
-            {
-                return ResponseEntity.badRequest().body("password does not match");
-            }
+    @Autowired
+    private CvService cvService;
 
-            userService.createUser(userDTO);
-            return ResponseEntity.ok(userDTO);
+    @GetMapping("/profile")
+    public ResponseEntity<?> getUserProfile() {
+        // Get current userz
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "User not authenticated");
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
-        catch (Exception e)
-        {
-            return ResponseEntity.badRequest().body(e.getMessage());
+
+        User currentUser = userService.findUserByEmail(auth.getName());
+        if (currentUser == null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", "User not found");
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
+
+        // Create settings object
+        UserDTO settings = new UserDTO();
+        settings.setFullName(currentUser.getFullName());
+        settings.setEmail(currentUser.getEmail());
+        settings.setPhone(currentUser.getPhone());
+
+        // Prepare response
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", currentUser);
+        response.put("userSettings", settings);
+        response.put("selectedCvCount", cvService.getSelectedCVCount(currentUser.getId()));
+
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody User userLoginDTO) throws Exception
-    {
-        User token = userService.login(userLoginDTO.getEmail(), userLoginDTO.getPassword());
-        if (token == null)
-            return ResponseEntity.badRequest().body("user does not exist");
-        return ResponseEntity.ok(token);
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateUserProfile(@RequestBody UserDTO settings) {
+        // Get current user
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "User not authenticated");
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+
+        User currentUser = userService.findUserByEmail(auth.getName());
+        if (currentUser == null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", "User not found");
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
+        try {
+            // Update only fields that are not null or empty
+            if (settings.getFullName() != null && !settings.getFullName().trim().isEmpty()) {
+                currentUser.setFullName(settings.getFullName());
+            }
+
+            if (settings.getPhone() != null && !settings.getPhone().trim().isEmpty()) {
+                // Check phone length
+                if (settings.getPhone().length() > 15) {
+                    throw new IllegalArgumentException("Phone number cannot exceed 15 characters");
+                }
+                // Check phone contains only numbers
+                if (!settings.getPhone().matches("\\d+")) {
+                    throw new IllegalArgumentException("Phone number must contain only digits");
+                }
+                currentUser.setPhone(settings.getPhone());
+            }
+
+            // Save updates
+            userRepository.save(currentUser);
+
+            // Refresh user data for response
+            UserDTO updatedSettings = new UserDTO();
+            updatedSettings.setFullName(currentUser.getFullName());
+            updatedSettings.setEmail(currentUser.getEmail());
+            updatedSettings.setPhone(currentUser.getPhone());
+
+            // Prepare response
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Profile updated successfully");
+            response.put("user", currentUser);
+            response.put("userSettings", updatedSettings);
+            response.put("selectedCvCount", cvService.getSelectedCVCount(currentUser.getId()));
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            // Handle validation errors
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } catch (Exception e) {
+            // Handle other errors
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Error updating profile: " + e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 }
