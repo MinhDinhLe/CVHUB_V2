@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DreamJob from "../LandingPage/DreamJob";
 import { Info, CheckCircle, Upload } from 'lucide-react';
+import axios from 'axios';
 
 const MyInfoPage = () => {
   localStorage.getItem('user');
   const [formData, setFormData] = useState({
     fullName: 'Phúc Tín',
     phone: '',
+    email: '',
     searchStatus: true,
     allowRecruiterSearch: true
   });
+
+  const [apiData, setApiData] = useState(null); // State để lưu dữ liệu API
+  const [error, setError] = useState(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -24,6 +29,63 @@ const MyInfoPage = () => {
     // Xử lý lưu thông tin
     console.log('Đã lưu thông tin:', formData);
   };
+
+  // TODO: get api user info
+  // const fetchUserProfile = async () => {
+  //   try {
+  //     const response = await axios.get('http://localhost:8080/api/user/profile', {
+  //       withCredentials: true, // Nếu API yêu cầu cookie hoặc session
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         // Thêm header Authorization nếu cần token (ví dụ: 'Authorization': `Bearer ${token}`)
+  //       },
+  //     });
+  
+  //     const data = response.data;
+  //     setFormData({
+  //       fullName: data.userSettings.fullName || '',
+  //       phone: data.userSettings.phone || '',
+  //       email: data.userSettings.email || '',
+  //       searchStatus: data.userSettings.searchStatus ?? true, // Lấy từ API hoặc mặc định true
+  //     allowRecruiterSearch: data.userSettings.allowRecruiterSearch ?? true, // Giả định mặc định là true, có thể điều chỉnh logic
+  //     });
+  //   } catch (err) {
+  //     setError((err as any).message);
+  //     console.error('Lỗi khi gọi API:', err);
+  //   }
+  // };
+  const token = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJuZ3V5ZW52YW5hQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQxMDA2NzU5LCJleHAiOjE3NDEwOTMxNTksInJvbGUiOiJST0xFX1VTRVIifQ.PzzHGEoJT3OAN7VSBI03CIfO-VUmqsafazgpIeikHD96pc9IeUdiUR7hoPIIxHR4";
+  localStorage.setItem('token', token);
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/api/user/profile', {
+          withCredentials: true, // Nếu API yêu cầu cookie hoặc session
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // Thêm header Authorization nếu cần token (ví d
+            // Thêm header Authorization nếu cần token (ví dụ: 'Authorization': `Bearer ${token}`)
+          },
+        });
+
+        const data = response.data;
+        console.log(data);
+        setApiData(data); // Lưu toàn bộ dữ liệu API vào state
+        setFormData({
+          fullName: data.userSettings.fullName || 'Phúc Tín',
+          phone: data.userSettings.phone,
+          email: data.userSettings.email || '',
+          searchStatus: data.userSettings.searchStatus ?? true,
+          allowRecruiterSearch: data.userSettings.allowRecruiterSearch ?? true,
+        });
+      } catch (err) {
+        setError((err as any).message);
+        console.error('Lỗi khi gọi API:', err);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   return (
     <div className="min-h-[100vh]">
@@ -70,7 +132,7 @@ const MyInfoPage = () => {
                 <input
                   type="email"
                   name="email"
-                  placeholder="example@email.com"
+                  value={formData.email}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-100"
                   disabled
                 />
@@ -191,3 +253,11 @@ const MyInfoPage = () => {
 };
 
 export default MyInfoPage;
+
+function setError(message: any) {
+  throw new Error('Function not implemented.');
+}
+function setApiData(data: any) {
+  throw new Error('Function not implemented.');
+}
+
