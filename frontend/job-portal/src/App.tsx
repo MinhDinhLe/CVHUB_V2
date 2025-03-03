@@ -6,11 +6,27 @@ import '@mantine/core/styles.css';
 import HomePage from './Pages/HomePage';
 import { create } from 'domain';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Router } from 'tabler-icons-react';
-import SignUpPage from './Pages/SignUpPage';
+import { Login, Router } from 'tabler-icons-react';
+import SignUpPage from './SignUpLogin/SignUpPage';
 import Header from './Header/Header';
-import { Home } from 'lucide-react';
+import { Footprints, Home, LogIn } from 'lucide-react';
 import MyInfoPage from './Pages/MyInfoPage';
+import JobSearch from './LandingPage/JobSearch';
+import LoginPage from './SignUpLogin/Login';
+import MyCV from './CV/MyCV';
+import CompanyListing from './Pages/ListCompany';
+import SavedJobs from './Pages/SavedJob';
+import JobApply from './Pages/JobApplyed';
+import JobSearchPage from './Pages/SuitableJob';
+import CVUploadPage from './CV/UploadCv';
+import CVTemplatesPage from './CV/CVTemplates';
+import CVpreview from './CV/CVpreview';
+import TopCVJobListing from './Pages/DetaiJobs';
+import CVHubJobListing from './Pages/DetaiJobs';
+import AlbertaCompanyPage from './Pages/CompanyDetail';
+import CVBuilder from './CV/buildCV';
+import DreamJob from './LandingPage/DreamJob';
+import Footer from './Footer/Footer'; // Import Footer component
 
 function App() {
 const theme = createTheme({
@@ -25,16 +41,32 @@ const theme = createTheme({
 
 return (
   <BrowserRouter>
-  <Header />
-  <Routes>
-    <Route path="/find-jobs" element={<HomePage />} /> 
-    <Route path="/find-talent" element={<div>Find Talent Page</div>} />
-    <Route path="/upload-job" element={<div>Upload Job Page</div>} />
-    <Route path="/about" element={<div>About Page</div>} />
-    <Route path="/sign-up" element={<SignUpPage />} /> 
-    <Route path="/info" element={<MyInfoPage/>} /> 
-  </Routes>
-</BrowserRouter>
+    <div className="flex flex-col min-h-screen">
+      <Header/>
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/find-jobs" element={<HomePage />} /> 
+          <Route path="/sign-up" element={<SignUpPage />} /> 
+          <Route path="/info" element={<MyInfoPage/>} /> 
+          <Route path="/jobsearch" element={<JobSearch/>} /> 
+          <Route path="/login" element={<LoginPage/>} /> 
+          <Route path="/myCV" element={<MyCV/>} /> 
+          <Route path="/list-company" element={<CompanyListing/>} /> 
+          <Route path="/saved-jobs" element={<SavedJobs/>} /> 
+          <Route path="/jobs-applyed" element={<JobApply/>} /> 
+          <Route path="/suitable-jobs" element={<JobSearchPage/>} /> 
+          <Route path="/upload-cv" element={<CVUploadPage/>} /> 
+          <Route path="/template-cv" element={<CVTemplatesPage/>} /> 
+          <Route path="/preview-cv" element={<CVpreview/>} /> 
+          <Route path="/job-details" element={<CVHubJobListing/>} /> 
+          <Route path="/company-details" element={<AlbertaCompanyPage/>} /> 
+          <Route path="/build-cv" element={<CVBuilder/>} /> 
+          <Route path="/" element={<DreamJob/>} /> 
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  </BrowserRouter>
 );
 }
 export default App;

@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Sử dụng gradient thay vì hình ảnh */
+.bg-hero {
+  background: linear-gradient(to right, #0abf84, #04503d);
+}
+
+.bg-meta {
+  background-image: url('/public/Meta.png');
+}
+

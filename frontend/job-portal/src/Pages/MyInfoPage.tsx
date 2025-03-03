@@ -3,6 +3,7 @@ import DreamJob from "../LandingPage/DreamJob";
 import { Info, CheckCircle, Upload } from 'lucide-react';
 
 const MyInfoPage = () => {
+  localStorage.getItem('user');
   const [formData, setFormData] = useState({
     fullName: 'Phúc Tín',
     phone: '',
@@ -57,7 +58,7 @@ const MyInfoPage = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="Nhập số điện thoại"
+                  placeholder={localStorage.getItem('user') || "Nhập số điện thoại "}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
@@ -185,7 +186,6 @@ const MyInfoPage = () => {
           </div>
         </div>
       </div>
-      
     </div>
   );
 };

@@ -1,4 +1,4 @@
-
+import Footer from "../Footer/Footer";
 import DreamJob from "../LandingPage/DreamJob";
 
 const HomePage = () => {
