@@ -131,13 +131,13 @@ public class JobRequestController {
 		JobRequest jobRequest = jobRequestRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Job not found with id: " + id));
 
-		List<JobRole> allJobRoles = jobRoleRepository.findAll();
-		List<Location> locations = locationRepository.findAll();
+//		List<JobRole> allJobRoles = jobRoleRepository.findAll();
+//		List<Location> locations = locationRepository.findAll();
 
 		Map<String, Object> response = new HashMap<>();
 		response.put("jobRequest", convertToDTO(jobRequest));
 //		response.put("locations", locations.stream().map(this::convertToLocationDTO).collect(Collectors.toList()));
-		response.put("allJobRoles", allJobRoles.stream().map(this::convertToJobRoleDTO).collect(Collectors.toList()));
+//		response.put("allJobRoles", allJobRoles.stream().map(this::convertToJobRoleDTO).collect(Collectors.toList()));
 
 		return ResponseEntity.ok(response);
 	}
@@ -299,12 +299,15 @@ public class JobRequestController {
 				jobRole.getTitle()
 		);
 	}
-
 	private OrganizationDTO convertToOrganizationDTO(Organization organization) {
 		return new OrganizationDTO(
 				organization.getId(),
 				organization.getTitle(),
-				organization.getLogoID()
+				organization.getWebsite() != null ? organization.getWebsite() : "",
+				organization.getSummary() != null ? organization.getSummary() : "",
+				organization.getDetail() != null ? organization.getDetail() : "",
+				organization.getLocation() != null ? organization.getLocation() : ""
 		);
 	}
+
 }

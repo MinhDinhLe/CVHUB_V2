@@ -71,6 +71,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/home/**", "/api/home").permitAll() // Cho phép truy cập API home mà không cần xác thực
+                        .requestMatchers("/api/jobrequests/**").permitAll() // Explicitly permit jobrequests endpoint
                         .requestMatchers("/api/**").permitAll()
                         .anyRequest().authenticated()
                 )

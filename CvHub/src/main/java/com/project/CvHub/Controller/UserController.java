@@ -74,7 +74,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
-        User currentUser = userService.findUserByEmail(auth.getName());
+        User currentUser = userService.findUserByEmail(((User) auth.getPrincipal()).getEmail());
         if (currentUser == null) {
             Map<String, Object> response = new HashMap<>();
             response.put("error", "User not found");

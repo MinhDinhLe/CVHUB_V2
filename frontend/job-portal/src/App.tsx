@@ -58,7 +58,7 @@ return (
           <Route path="/upload-cv" element={<CVUploadPage/>} /> 
           <Route path="/template-cv" element={<CVTemplatesPage/>} /> 
           <Route path="/preview-cv" element={<CVpreview/>} /> 
-          <Route path="/job-details" element={<CVHubJobListing/>} /> 
+          <Route path="/job-details/:id" element={<CVHubJobListing/>} />
           <Route path="/company-details" element={<AlbertaCompanyPage/>} /> 
           <Route path="/build-cv" element={<CVBuilder/>} /> 
           <Route path="/" element={<DreamJob/>} /> 

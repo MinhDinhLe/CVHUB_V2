@@ -16,19 +16,19 @@ public class OrganizationDTO {
     private Long id;
     private String title;
     private String logoID;
-    private MultipartFile logoFile;
-    private String logoUrl;
+    private byte[] logoFile;
     private String website;
     private String summary;
     private String detail;
     private String location;
 
-
-
-    public OrganizationDTO(Long id, String title, UUID logoID) {
-        this.title = title;
+    public OrganizationDTO(Long id, String title, String website, String summary, String detail, String location) {
         this.id = id;
-        this.logoID = String.valueOf(logoID);
+        this.title = title;
+        this.website = website;
+        this.summary = summary;
+        this.detail = detail;
+        this.location = location;
     }
 }
 

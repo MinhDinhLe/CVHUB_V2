@@ -24,11 +24,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import com.project.CvHub.Controller.model.JobRequest2DTO;
 import com.project.CvHub.Controller.model.JobSearchDTO;
+import com.project.CvHub.DTO.JobRequestResponseDTO;
+import com.project.CvHub.DTO.JobRoleDTO;
+import com.project.CvHub.DTO.LocationDTO;
+import com.project.CvHub.DTO.OrganizationDTO;
 import com.project.CvHub.Entity.JobRequest;
 import com.project.CvHub.Entity.JobRole;
 import com.project.CvHub.Entity.Location;
+import com.project.CvHub.Entity.Organization;
 import com.project.CvHub.Repository.JobRequestRepository;
 import com.project.CvHub.Repository.JobRoleRepository;
 import com.project.CvHub.Repository.LocationRepository;
@@ -90,7 +97,7 @@ public class HomeController {
 	@GetMapping(value = {"/home"})
 	public ResponseEntity<Map<String, Object>> getHomeData(
 			@RequestParam(value = "page", defaultValue = "0") int page,
-			@RequestParam(value = "limit", defaultValue = "10") int limit) {
+			@RequestParam(value = "limit", defaultValue = "3") int limit) {
 
 		PageRequest pageRequest = PageRequest.of(
 				page, limit,
@@ -99,19 +106,21 @@ public class HomeController {
 
 		Page<JobRequest> jobRequestPage = jobRequestRepository.findAll(pageRequest);
 		int totalPages = jobRequestPage.getTotalPages();
-		List<JobRequest> jobRequests = jobRequestPage.getContent();
+		List<JobRequest2DTO> jobRequestDTOs = JobRequest2DTO.JobRequestMapper.mapToDTO(jobRequestPage);
+
 		List<Location> locations = locationRepository.findAll();
+		List<JobRole> jobRoles = jobRoleRepository.findAll(); // Lấy danh sách tất cả ngành nghề
 
 		Map<String, Object> response = new HashMap<>();
-		response.put("jobrequests", jobRequests);
+		response.put("jobrequests", jobRequestDTOs);
 		response.put("totalPages", totalPages);
 		response.put("currentPage", page);
-		response.put("currentSiteId", getCurrentSiteId());
-		response.put("userDisplayName", getCurrentUserDisplayName());
-		response.put("locations", locations);
+		response.put("locations", locations); // Thêm danh sách địa điểm
+		response.put("jobRoles", jobRoles); // Thêm danh sách ngành nghề
 
 		return ResponseEntity.ok(response);
 	}
+
 
 	@GetMapping("/job-roles")
 	public ResponseEntity<List<JobRole>> getAllJobRoles() {
@@ -134,9 +143,12 @@ public class HomeController {
 				jobSearchDTO.getLocation(),
 				jobSearchDTO.getIndustry()
 		);
-
+		List<JobRequestResponseDTO> jobs = searchResults
+				.stream()
+				.map(this::convertToDTO)
+				.toList();
 		Map<String, Object> response = new HashMap<>();
-		response.put("searchResults", searchResults);
+		response.put("searchResults", jobs);
 
 		return ResponseEntity.ok(response);
 	}
@@ -167,20 +179,52 @@ public class HomeController {
 	}
 
 	// Phương thức hỗ trợ - cần triển khai
-	private String getCurrentSiteId() {
-		// Implement your logic to get the current site ID
-		return "default-site";
-	}
 
-	private String getCurrentUserDisplayName() {
-		// Implement your logic to get the current user display name
-		return "Guest";
-	}
 
 	public byte[] uuidToBytes(UUID uuid) {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[16]); // Chỉ cần 16 byte cho UUID
 		byteBuffer.putLong(uuid.getMostSignificantBits());
 		byteBuffer.putLong(uuid.getLeastSignificantBits());
 		return byteBuffer.array();
+	}
+	// Helper methods for DTO conversion
+	private JobRequestResponseDTO convertToDTO(JobRequest jobRequest) {
+		return new JobRequestResponseDTO(
+				jobRequest.getId(),
+				jobRequest.getTitle(),
+				convertToLocationDTO(jobRequest.getLocation()),
+				convertToJobRoleDTO(jobRequest.getJobRole()),
+				jobRequest.getExperience(),
+				jobRequest.getSalary(),
+				jobRequest.getDetailsJob(),
+				jobRequest.getRequirementsCandidate(),
+				jobRequest.getBenefitCandidate(),
+				jobRequest.getDeadlineApplication(),
+				convertToOrganizationDTO(jobRequest.getOrganization())
+		);
+	}
+
+	private LocationDTO convertToLocationDTO(Location location) {
+		return new LocationDTO(
+				location.getCode(),
+				location.getName()
+		);
+	}
+
+	private JobRoleDTO convertToJobRoleDTO(JobRole jobRole) {
+		return new JobRoleDTO(
+				jobRole.getId(),
+				jobRole.getTitle()
+		);
+	}
+	private OrganizationDTO convertToOrganizationDTO(Organization organization) {
+		return new OrganizationDTO(
+				organization.getId(),
+				organization.getTitle(),
+				organization.getWebsite() != null ? organization.getWebsite() : "",
+				organization.getSummary() != null ? organization.getSummary() : "",
+				organization.getDetail() != null ? organization.getDetail() : "",
+				organization.getLocation() != null ? organization.getLocation() : ""
+		);
 	}
 }

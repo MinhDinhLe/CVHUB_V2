@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import DreamJob from "../LandingPage/DreamJob";
 import { Info, CheckCircle, Upload } from 'lucide-react';
+import ChangePasswordPopup from '../PopUp/ChangePW'; // Import component popup đổi mật khẩu
 import axios from 'axios';
 
 const MyInfoPage = () => {
   localStorage.getItem('user');
   const [formData, setFormData] = useState({
-    fullName: 'Phúc Tín',
+    fullName: '',
     phone: '',
     email: '',
     searchStatus: true,
@@ -14,7 +15,9 @@ const MyInfoPage = () => {
   });
 
   const [apiData, setApiData] = useState(null); // State để lưu dữ liệu API
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null);  
+  const [isPasswordPopupOpen, setIsPasswordPopupOpen] = useState(false); // State để điều khiển popup đổi mật khẩu
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -23,38 +26,34 @@ const MyInfoPage = () => {
       [name]: type === 'checkbox' ? checked : value
     });
   };
+  
+    // Mở popup đổi mật khẩu
+    const openPasswordPopup = () => {
+      setIsPasswordPopupOpen(true);
+    };
+  
+    // Đóng popup đổi mật khẩu
+    const closePasswordPopup = () => {
+      setIsPasswordPopupOpen(false);
+    };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Xử lý lưu thông tin
-    console.log('Đã lưu thông tin:', formData);
+    try {
+      const response = await axios.put('http://localhost:8080/api/user/profile', formData, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      console.log('Thông tin đã được cập nhật:', response.data);
+    } catch (err: any) { // Ép kiểu err thành any
+      setError(err.message);
+      console.error('Lỗi khi gửi dữ liệu:', err);
+    }
   };
 
-  // TODO: get api user info
-  // const fetchUserProfile = async () => {
-  //   try {
-  //     const response = await axios.get('http://localhost:8080/api/user/profile', {
-  //       withCredentials: true, // Nếu API yêu cầu cookie hoặc session
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         // Thêm header Authorization nếu cần token (ví dụ: 'Authorization': `Bearer ${token}`)
-  //       },
-  //     });
-  
-  //     const data = response.data;
-  //     setFormData({
-  //       fullName: data.userSettings.fullName || '',
-  //       phone: data.userSettings.phone || '',
-  //       email: data.userSettings.email || '',
-  //       searchStatus: data.userSettings.searchStatus ?? true, // Lấy từ API hoặc mặc định true
-  //     allowRecruiterSearch: data.userSettings.allowRecruiterSearch ?? true, // Giả định mặc định là true, có thể điều chỉnh logic
-  //     });
-  //   } catch (err) {
-  //     setError((err as any).message);
-  //     console.error('Lỗi khi gọi API:', err);
-  //   }
-  // };
-  const token = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJuZ3V5ZW52YW5hQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQxMDA2NzU5LCJleHAiOjE3NDEwOTMxNTksInJvbGUiOiJST0xFX1VTRVIifQ.PzzHGEoJT3OAN7VSBI03CIfO-VUmqsafazgpIeikHD96pc9IeUdiUR7hoPIIxHR4";
+  const token = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJuZ3V5ZW52YW5hQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQxMDg5MDU2LCJleHAiOjE3NDExNzU0NTYsInJvbGUiOiJST0xFX1VTRVIifQ.KtgqNHIReaTledu50o5N2EzCJ8ILV_0OQpKW7oBlvo4p0zj8pWaV-Pvf4hXpyvJj";
   localStorage.setItem('token', token);
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -72,7 +71,7 @@ const MyInfoPage = () => {
         console.log(data);
         setApiData(data); // Lưu toàn bộ dữ liệu API vào state
         setFormData({
-          fullName: data.userSettings.fullName || 'Phúc Tín',
+          fullName: data.userSettings.fullName || '',
           phone: data.userSettings.phone,
           email: data.userSettings.email || '',
           searchStatus: data.userSettings.searchStatus ?? true,
@@ -140,12 +139,21 @@ const MyInfoPage = () => {
               </div>
 
 
+              <div className="flex justify-between mt-6">
               <button 
                 type="submit"
                 className="bg-green-500 text-white font-medium py-3 px-8 rounded-md hover:bg-green-600 transition duration-200"
               >
                 Lưu
               </button>
+              <button 
+                type="button"
+                onClick={openPasswordPopup} // Sử dụng hàm mở popup khi click
+                className="bg-green-500 text-white font-medium py-3 px-8 rounded-md hover:bg-green-600 transition duration-200"
+              >
+                Đổi mật khẩu
+              </button>
+            </div>
             </form>
           </div>
           
